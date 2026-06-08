@@ -99,24 +99,27 @@ Before delivering, imagine (or actually mock) the cover dropped into the real do
 
 ## 9 cover paradigms (封面范式)
 
-The workflow doc names a paradigm table. The two quoted in the conversation are 大字报型 and 泥石流型; the rest below are `[recon]` brand-fitted reconstructions — **replace with your workflow doc's actual table when you paste it in.** Each maps to a content type and notes whether it needs a photo.
+The workflow doc's real table (Section E · ch4/ch18/ch21). 需要照片 column is the skill's read of each (the skill makes the text layer, never the photo).
 
-| 范式 | 长什么样 | 适合内容 | 需要照片? |
+| 范式 | 特征 | 适用场景 | 需要照片? |
 | --- | --- | --- | --- |
-| 大字报型 | 一句超大主文字压满上半屏 | 观点 / 暴论 / 情绪 | 否（纯色或弱底图即可） |
-| 泥石流型 | 多行口语堆叠、像聊天截图 | 吐槽 / 真实体验流水账 | 否 |
-| 数字证据型 `[recon]` | 一个大数字 + 短副文字背书 | 长测 / 评测 / 数据 | 弱 |
-| 对比型 `[recon]` | 前/后、有/无 双栏 | 改装 / 升级 / 减重 | 是 |
-| 实拍特写型 `[recon]` | 产品/细节特写 + 角标小字 | 开箱 / 硬件细节 | 是（必须） |
-| 场景代入型 `[recon]` | 使用现场照 + 一句主文字 | 通勤 / 骑行场景 | 是（必须） |
-| 清单型 `[recon]` | 主文字点题 + 副文字"N 件事" | 攻略 / 避坑 | 否 |
-| 提问型 `[recon]` | 一句疑问句主文字 | 选购纠结 / 答疑 | 否 |
-| 反差型 `[recon]` | 预期 vs 现实，主副互相打脸 | 体验反转 | 弱 |
+| 大字报型 | 几个超大字 + 撞色底 | 知识干货 / 观点 | 否（纯色/弱底图即可） |
+| 多图拼贴型 | 同主题 2–9 张拼贴 | 旅行 / 美食打卡 / 合集 | 是（多张） |
+| 人像抠图型 | 真人 / IP 抠出 | 人格化账号 / 穿搭 | 是 |
+| 推荐集锦型 | 纯文字升级版 | 知识类需要图片辅助 | 否 |
+| 经典图文型 | 大图 + 花字 | 适用面最广 | 是 |
+| 留白排版型 | 简单朴素 + 留白 | 摄影 / 设计 / 生活美学 | 弱 |
+| 极简摄影型 | 高级感照片 + 少量文字 | 摄影 / 产品 | 是（必须） |
+| 泥石流型 | 故意做粗糙，大巧若拙 | UGC 氛围 / 书摘 | 否 |
+| 表情包/素人感型 | 反精致、幽默 | 涨粉初期 | 否 |
 
-Paradigms marked 需要照片 = 是 require a real photo from the user — the skill generates the text layer to sit on it, not the photo. If the user has no photo for a photo-required paradigm, switch to a no-photo paradigm rather than faking an image.
+Two 顶层打法 sit above the table (Section F · ch35): **悬念出题型**（封面只给问题/景象不给答案，标题补诱惑）和 **结构化大而全型**（首屏告知所有信息点"8个秘密""10大副业"，但让人觉得要点进去细看）。
+
+Paradigms marked 需要照片 = 是 require a real photo from the user — the skill generates the text layer to sit on it, not the photo. Cosmosworks 产品/新品 most often lands on **极简摄影型**(整车实拍 + 少量大字) or **经典图文型**; pure 观点/暴论 lands on **大字报型**. If the user has no photo for a photo-required paradigm, switch to a no-photo paradigm (大字报 / 推荐集锦 / 泥石流 / 表情包) rather than faking an image.
 
 ## Self-check before delivery
 
+- [ ] **可逆性测试 (doc 合格判据)** — 遮住封面只看标题、遮住标题只看封面，**两边都让人想点**；两条读起来是"补充"不是"复读"。
 - [ ] 封面 ≠ 标题 — different sentence, same fact, different info point.
 - [ ] 主文字 ≤ 10 字, 副文字 ≤ 12 字.
 - [ ] Size contrast between 主 and 副 is obvious.

@@ -24,11 +24,16 @@ Four brand themes. The editor defaults to **cosmos-green**. Set the relevant col
 
 Pick the theme by **content feeling**, not by category lookup — same logic as the title styles. A commuting piece is usually cosmos-clean; a 18% 爬坡实测 is cosmos-sport; a night-ride journal is cosmos-dark.
 
-## Visual anchor (固定识别符号) — TODO
+## Visual anchor (固定识别符号) — doc Section I / ch42 (2025-10)
 
-The workflow mentions a visual-anchor strategy (固定识别符号 + 固定颜色) for brand recognition across the feed, but the conversation left the specifics **undecided**. Once the Cosmosworks VI settles its anchor (a fixed corner mark? a fixed accent color? a fixed type treatment for the model name?), encode it here and pre-place it as a locked layer in the editor template.
+The workflow names a 视觉锚点 long-term strategy: **固定一个识别符号**（doc 例：黄色手套＋拖鞋），用久了就变成账号识别符号。这是封面长期主义打法——不追单篇爆款，而是建立持续识别度。
 
-Until then: keep the cosmos-green accent consistent as a soft anchor, and don't invent a logo/badge that isn't real.
+doc 给宇宙 E-BIKE 的候选方向（仍需团队拍板选一个）：
+- **你本人的墨镜**（人像锚点）
+- **某个固定颜色**（cosmos-green `#c7ff3e` 是现成的软锚点）
+- **某个固定构图**（如整车永远 3/4 侧 + 同一机位）
+
+一旦敲定，把它当作**可锁定图层**预置进编辑器（与可拖动的 主/副文字分离，不参与盲选切换）。在团队选定之前：保持 cosmos-green 强调色一致作为软锚点，**不要编造一个并不存在的 logo/badge**。
 
 ## Out of scope
 

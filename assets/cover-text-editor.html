@@ -10,12 +10,14 @@
   这是一个自包含的网页：直接用浏览器打开，无需任何构建步骤。
 
   Claude 每次只改下面的 ZUHE 数组（3 个候选组合的文案），其余全是静态骨架。
+  Claude 看过用户照片后，预设 ZUHE（文案）、layout（文字版式）、bg（底图缩放/平移）、scrim（蒙版）。
   人类作者在浏览器里：
     1. 载入自己的封面底图（或用主题纯色背景）
-    2. 拖动 主文字 / 副文字 两个文字层到合适位置
-    3. 用右侧滑块微调 位置 / 旋转 / 字号 / 字重 / 颜色 / 透明度 / 字距
-    4. 切 组合 A/B/C 盲选文案——版式保留，只换文字
-    5. 点「复制全部」把 3 组 标题+主+副 一次性贴进微信群盲选
+    2. 「底图调整」缩放/平移底图，把主体挪进安全区、避免被裁掉
+    3. 拖动 主文字 / 副文字 两个文字层，右侧滑块微调 位置/旋转/字号/字重/颜色/透明度/字距
+    4. 底图太亮文字看不清，就开「可读性蒙版 Scrim」压暗
+    5. 切 组合 A/B/C 盲选文案——版式/底图/蒙版保留，只换文字
+    6. 点「复制全部」把 3 组 标题+主+副 一次性贴进微信群盲选
   ------------------------------------------------------------------
 -->
 <style>
@@ -60,7 +62,8 @@
     transform-origin:top center;
     box-shadow:0 12px 48px rgba(0,0,0,.5);
   }
-  .canvas .bg-img{position:absolute; inset:0; width:100%; height:100%; object-fit:cover;}
+  .canvas .bg-img{position:absolute; inset:0; width:100%; height:100%; object-fit:cover; transform-origin:center;}
+  .scrim{position:absolute; inset:0; pointer-events:none; z-index:1;}
   .safe-zone{position:absolute; inset:0; pointer-events:none; z-index:50; display:none;}
   .safe-zone.on{display:block;}
   .safe-zone::before, .safe-zone::after{
@@ -118,6 +121,7 @@
 
     <div class="canvas" id="canvas">
       <img class="bg-img" id="bgImg" alt="" style="display:none">
+      <div class="scrim" id="scrim"></div>
       <div class="safe-zone on" id="safeZone">
         <span class="safe-label top">↑ 安全区上界 · 头像/账号名遮挡区</span>
         <span class="safe-label bot">↓ 安全区下界 · 点赞/评论按钮遮挡区</span>
@@ -169,6 +173,39 @@
     </div>
 
     <hr class="divider">
+    <div>
+      <h2>底图调整</h2>
+      <div class="row2" style="margin-top:10px">
+        <div class="field"><label>缩放 <span id="vBgS"></span></label><input type="range" id="ctlBgS" min="100" max="260" value="100"></div>
+        <div class="field"><label>水平 <span id="vBgX"></span></label><input type="range" id="ctlBgX" min="-400" max="400" value="0"></div>
+      </div>
+      <div class="field"><label>垂直 <span id="vBgY"></span></label><input type="range" id="ctlBgY" min="-500" max="500" value="0"></div>
+      <p class="hint">载入底图后用这里缩放/平移：把主体挪进安全区、避免被裁掉。AI 已按你给的照片预设了一版，这里只做微调。</p>
+    </div>
+
+    <hr class="divider">
+    <div>
+      <h2>可读性蒙版 / Scrim</h2>
+      <div class="layer-tabs" style="margin-top:10px">
+        <button id="scrimToggle" class="active">蒙版开</button>
+      </div>
+      <div class="field" style="margin-top:10px">
+        <label>方向</label>
+        <select id="ctlScrimMode">
+          <option value="bottom">底部渐暗</option>
+          <option value="top">顶部渐暗</option>
+          <option value="both">上下渐暗</option>
+          <option value="full">整体压暗</option>
+        </select>
+      </div>
+      <div class="row2">
+        <div class="field"><label>颜色</label><input type="color" id="ctlScrimC" value="#000000"></div>
+        <div class="field"><label>浓度 <span id="vScrimO"></span></label><input type="range" id="ctlScrimO" min="0" max="90" value="35"></div>
+      </div>
+      <p class="hint">底图太亮、文字看不清时打开；让文字背后压暗一点。</p>
+    </div>
+
+    <hr class="divider">
     <div class="field">
       <h2>盲选导出</h2>
       <button id="copyBtn" style="margin-top:6px">复制全部 3 组 → 贴进微信群</button>
@@ -198,6 +235,12 @@ const layout = {
   fu :{ x:96,  y:470, r:0,  size:44,  weight:700, color:'#c7ff3e', opacity:100, letter:1, align:'left' },
 };
 
+/* 底图 与 蒙版 的起始状态 —— Claude 看过用户照片后在这里预设，人类再在编辑器里微调。
+   bg.scale 是百分比（100 = 原始 object-fit:cover 填满）；x/y 是平移像素（正=右/下）。
+   scrim.mode: 'bottom' | 'top' | 'both' | 'full'；opacity 0-90。底图亮、文字糊就开。 */
+const bg = { scale:100, x:0, y:0 };
+const scrim = { on:true, color:'#000000', opacity:35, mode:'bottom' };
+
 let curZuhe = 0;
 let curLayer = 'zhu';
 
@@ -220,7 +263,26 @@ function renderLayer(key){
   node.style.transform = `rotate(${L.r}deg)`;
   node.classList.toggle('sel', key === curLayer);
 }
-function renderAll(){ renderLayer('zhu'); renderLayer('fu'); }
+function renderBg(){
+  el('bgImg').style.transform = `translate(${bg.x}px, ${bg.y}px) scale(${bg.scale/100})`;
+}
+function hexToRgba(hex, a){
+  const n = parseInt(hex.slice(1),16);
+  return `rgba(${(n>>16)&255}, ${(n>>8)&255}, ${n&255}, ${a})`;
+}
+function renderScrim(){
+  const s = el('scrim');
+  if(!scrim.on){ s.style.background='none'; return; }
+  const c = hexToRgba(scrim.color, scrim.opacity/100);
+  const t = hexToRgba(scrim.color, 0);
+  let v;
+  if(scrim.mode==='full')      v = c;
+  else if(scrim.mode==='top')  v = `linear-gradient(to bottom, ${c}, ${t} 55%)`;
+  else if(scrim.mode==='both') v = `linear-gradient(to bottom, ${c}, ${t} 35%, ${t} 65%, ${c})`;
+  else                         v = `linear-gradient(to top, ${c}, ${t} 55%)`;
+  s.style.background = v;
+}
+function renderAll(){ renderBg(); renderScrim(); renderLayer('zhu'); renderLayer('fu'); }
 
 function syncControls(){
   const L = layout[curLayer], z = ZUHE[curZuhe];
@@ -250,6 +312,38 @@ bindRange('ctlO','opacity','vO','%');
 el('ctlC').addEventListener('input', e=>{ layout[curLayer].color=e.target.value; renderLayer(curLayer); });
 el('ctlAlign').addEventListener('change', e=>{ layout[curLayer].align=e.target.value; renderLayer(curLayer); });
 el('ctlText').addEventListener('input', e=>{ ZUHE[curZuhe][curLayer]=e.target.value; renderLayer(curLayer); buildCopy(); });
+
+/* 底图控件 */
+function bindBg(id, prop, vId, suffix=''){
+  el(id).addEventListener('input', e=>{
+    bg[prop] = +e.target.value;
+    if(vId) el(vId).textContent = e.target.value + suffix;
+    renderBg();
+  });
+}
+bindBg('ctlBgS','scale','vBgS','%'); bindBg('ctlBgX','x','vBgX'); bindBg('ctlBgY','y','vBgY');
+
+/* 蒙版控件 */
+el('ctlScrimMode').addEventListener('change', e=>{ scrim.mode=e.target.value; renderScrim(); });
+el('ctlScrimC').addEventListener('input', e=>{ scrim.color=e.target.value; renderScrim(); });
+el('ctlScrimO').addEventListener('input', e=>{ scrim.opacity=+e.target.value; el('vScrimO').textContent=e.target.value+'%'; renderScrim(); });
+el('scrimToggle').addEventListener('click', e=>{
+  scrim.on=!scrim.on;
+  e.target.classList.toggle('active', scrim.on);
+  e.target.textContent = scrim.on ? '蒙版开' : '蒙版关';
+  renderScrim();
+});
+
+/* 把 bg/scrim 起始值写进控件 */
+function syncBgScrimControls(){
+  el('ctlBgS').value=bg.scale; el('vBgS').textContent=bg.scale+'%';
+  el('ctlBgX').value=bg.x; el('vBgX').textContent=bg.x;
+  el('ctlBgY').value=bg.y; el('vBgY').textContent=bg.y;
+  el('ctlScrimMode').value=scrim.mode; el('ctlScrimC').value=scrim.color;
+  el('ctlScrimO').value=scrim.opacity; el('vScrimO').textContent=scrim.opacity+'%';
+  el('scrimToggle').classList.toggle('active', scrim.on);
+  el('scrimToggle').textContent = scrim.on ? '蒙版开' : '蒙版关';
+}
 
 /* 层切换 tab */
 document.querySelectorAll('.layer-tabs button').forEach(b=>{
@@ -304,6 +398,7 @@ el('bgInput').addEventListener('change', e=>{
   const f=e.target.files[0]; if(!f) return;
   const url=URL.createObjectURL(f);
   el('bgImg').src=url; el('bgImg').style.display='block';
+  renderBg();
 });
 
 /* 安全区开关 */
@@ -338,6 +433,7 @@ window.addEventListener('resize', fitCanvas);
 /* init */
 buildZuheSwitch();
 syncControls();
+syncBgScrimControls();
 renderAll();
 buildCopy();
 fitCanvas();
