@@ -1,7 +1,7 @@
-# Guizang Social Card Skill · Xiaohongshu Carousels / WeChat Cover Pairs
+# COSMOS Social Card Skill · Xiaohongshu Carousels / WeChat Cover Pairs
 
-![GitHub stars](https://img.shields.io/github/stars/op7418/guizang-social-card-skill?style=flat-square)
-![License](https://img.shields.io/github/license/op7418/guizang-social-card-skill?style=flat-square)
+![GitHub stars](https://img.shields.io/github/stars/stanley50z/cosmos-social-card-skill?style=flat-square)
+![License](https://img.shields.io/github/license/stanley50z/cosmos-social-card-skill?style=flat-square)
 ![Skill](https://img.shields.io/badge/Skill-Agent-111111?style=flat-square)
 ![Social Cards](https://img.shields.io/badge/Social-Cards-FF4D6D?style=flat-square)
 ![Claude Code](https://img.shields.io/badge/Claude%20Code-Supported-6B5B95?style=flat-square)
@@ -18,24 +18,24 @@ Two visual systems share one workflow:
 
 > Sister project to [guizang-ppt-skill](https://github.com/op7418/guizang-ppt-skill). Shared visual language, separate maintenance. PPT solves "horizontal swipe talks"; this one solves "static feed images."
 
-![Guizang Social Card Skill preview](https://github.com/user-attachments/assets/d370abcc-1fc4-4de1-903a-09020a6556ce)
+![COSMOS Social Card Skill preview](https://github.com/user-attachments/assets/d370abcc-1fc4-4de1-903a-09020a6556ce)
 
 ## 30-second start
 
 ```bash
-npx skills add https://github.com/op7418/guizang-social-card-skill --skill guizang-social-card-skill
+npx skills add https://github.com/stanley50z/cosmos-social-card-skill --skill cosmos-social-card-skill
 ```
 
 Or paste this to an AI agent with shell access:
 
 ```text
-Install guizang-social-card-skill for me. Clone https://github.com/op7418/guizang-social-card-skill into ~/.claude/skills/guizang-social-card-skill, then verify that SKILL.md, assets/, and references/ exist.
+Install cosmos-social-card-skill for me. Clone https://github.com/stanley50z/cosmos-social-card-skill into ~/.claude/skills/cosmos-social-card-skill, then verify that SKILL.md, assets/, and references/ exist.
 ```
 
 If you already installed it, update with:
 
 ```text
-Update guizang-social-card-skill for me. Go to ~/.claude/skills/guizang-social-card-skill, run git pull, then tell me the latest commit.
+Update cosmos-social-card-skill for me. Go to ~/.claude/skills/cosmos-social-card-skill, run git pull, then tell me the latest commit.
 ```
 
 Then ask your agent:
@@ -123,16 +123,16 @@ Tiered by "circle of competence" — see [`references/category-cookbook.md`](./r
 ### Option 1: One-line install (recommended)
 
 ```bash
-npx skills add https://github.com/op7418/guizang-social-card-skill --skill guizang-social-card-skill
+npx skills add https://github.com/stanley50z/cosmos-social-card-skill --skill cosmos-social-card-skill
 ```
 
 ### Option 2: Paste this to an AI
 
-> Install the `guizang-social-card-skill` Claude Code skill for me. Steps:
+> Install the `cosmos-social-card-skill` Claude Code skill for me. Steps:
 >
 > 1. Make sure `~/.claude/skills/` exists (create if not)
-> 2. Run `git clone https://github.com/op7418/guizang-social-card-skill.git ~/.claude/skills/guizang-social-card-skill`
-> 3. Verify: `ls ~/.claude/skills/guizang-social-card-skill/` should show `SKILL.md`, `assets/`, `references/`
+> 2. Run `git clone https://github.com/stanley50z/cosmos-social-card-skill.git ~/.claude/skills/cosmos-social-card-skill`
+> 3. Verify: `ls ~/.claude/skills/cosmos-social-card-skill/` should show `SKILL.md`, `assets/`, `references/`
 > 4. Tell me when done. Later, saying things like "make me a Xiaohongshu carousel" will trigger this skill.
 
 Paste the block above into Claude Code / Cursor / any AI agent with shell access.
@@ -140,7 +140,7 @@ Paste the block above into Claude Code / Cursor / any AI agent with shell access
 ### Option 3: Manual CLI
 
 ```bash
-git clone https://github.com/op7418/guizang-social-card-skill.git ~/.claude/skills/guizang-social-card-skill
+git clone https://github.com/stanley50z/cosmos-social-card-skill.git ~/.claude/skills/cosmos-social-card-skill
 ```
 
 ### How to trigger it
@@ -214,7 +214,7 @@ To switch themes, just replace the `<section class="poster" data-theme="...">` a
 ## Directory
 
 ```
-guizang-social-card-skill/
+cosmos-social-card-skill/
 ├── SKILL.md                              ← Main skill file: 7-step workflow
 ├── README.md                             ← Chinese README
 ├── README.en.md                          ← This file
