@@ -1,4 +1,4 @@
-# COSMOS Social Card Skill · 小红书图文 / 公众号封面对
+# COSMOS Cover-Text & Title Skill · 小红书封面文字 / 爆款标题
 
 ![GitHub stars](https://img.shields.io/github/stars/stanley50z/cosmos-social-card-skill?style=flat-square)
 ![License](https://img.shields.io/github/license/stanley50z/cosmos-social-card-skill?style=flat-square)
@@ -9,16 +9,28 @@
 
 [English README](./README.en.md)
 
-一个适配 Claude Code / Codex 等 Agent 环境的图文卡片技能,用于从文章、文案、截图、产品笔记、字幕或照片生成**小红书 / Rednote 图文组图**与**公众号 21:9 + 1:1 封面对**。
+一个适配 Claude Code / Codex 等 Agent 环境的技能,用于从文章、文案、截图、产品笔记、字幕或照片生成**小红书 / Rednote 封面文字**(主文字 + 副文字)与**爆款标题**——并产出一个**可拖拽的自包含 HTML 编辑器**,把这些文字摆到你自己的封面照片上。
 
-内置两套视觉系统,共用一份图文工作流:
+**生成的是封面上的字,不是封面图本身**。封面照片用你自己的真实素材(真实感 ＞ 精美感);技能负责文案,把摆放控制权交回给你。
 
-- **电子杂志风(Editorial)**。像 *Monocle* / *Kinfolk* / *Cereal* 那样克制的版面,适合叙事、生活方式、旅行、阅读、影视、个人观察。
-- **瑞士国际主义(Swiss)**。网格、单一锚点色、直角发丝线、极致字号对比,适合产品测评、数据、方法论、教程、AI 工具。
+每次产出 **3 个候选组合**(发群里盲选),每组:
 
-> 这个 Skill 是 [guizang-ppt-skill](https://github.com/op7418/guizang-ppt-skill) 的姊妹项目,共享美学语言但独立维护。PPT 解决"横向翻页演讲",这里解决"静态信息流图文"。
+```
+标题   —— 偏正式·客观,给正文/搜索(不上封面)
+主文字 —— ≤10 字,偏情绪·网感,封面最大的字
+副文字 —— ≤12 字,一个具体回报点 / 搜索关键词
+```
 
-![COSMOS Social Card Skill 效果展示](https://github.com/user-attachments/assets/d370abcc-1fc4-4de1-903a-09020a6556ce)
+核心规则:**封面 ＝ 标题,但不重复**——同一件事,透露不同信息点。
+
+```
+标题:骑了一年 Vapor SL:3千公里真实长测
+封面:谁懂啊 / 3千公里没进过店
+```
+
+默认品牌口吻是 **Cosmosworks**(电助力 / 电单车,平视感、不教导、不堆 emoji)。
+
+> 注:本技能此前是「小红书图文组图 / 公众号封面对」的整图渲染管线;现已转向「封面文字 + 标题生成 + 可调模板」。旧的整图系统保留在 `references/legacy/` 与 `assets/legacy/`,不在当前工作流内。
 
 ## 30 秒开始
 
@@ -41,31 +53,31 @@ npx skills add https://github.com/stanley50z/cosmos-social-card-skill --skill co
 安装后直接对 Agent 说:
 
 ```text
-帮我基于这篇文章做一套瑞士风小红书图文,5 张,IKB 蓝。
+帮我基于这篇长测给 3 个候选组合:标题 + 封面主文字 + 副文字。
 ```
 
 也可以试这些请求:
 
 ```text
-基于这份产品测评做一套小红书 3:4,标题用电子杂志风。
-帮我把这篇文章做成公众号封面对:21:9 头图 + 1:1 分享卡,视觉保持一致。
-我有 3 张露营照片,帮我做一套全图风格的小红书图文。
-把这段游戏攻略文案做成一套小红书图文,需要从 wallhaven 拿点游戏原画。
+这篇通勤测评,给我 3 版标题 + 封面文字,发群里盲选。
+把这段开箱文案做成封面文字,我有产品特写照片,出个可拖拽模板。
+基于这篇观点稿,用大字报型封面,主文字要够冲。
+我有标题了:「骑了一年 Vapor SL」,帮我配 3 条不重复的封面文字。
 ```
 
 ## 效果
 
-- 🖋 **双视觉系统**:电子杂志风做氛围与叙事,瑞士风做事实与结构,两套共用同一份工作流
-- 📐 **3 个画板尺寸**:`.poster.xhs` 1080×1440(小红书 3:4)、`.poster.wide` 2100×900(公众号 21:9)、`.poster.square` 1080×1080(公众号 1:1)
-- 🧩 **28 个版式骨架**:Editorial 16 个(`M01-M16`,含 Image-Led Cover、Pipeline、Before/After 等)+ Swiss 12 个(`S01-S12`,含 KPI Tower、H-Bar Chart、Matrix + Hero 等)
-- 🎨 **10 套主题预设**:Editorial 6 套(墨水经典、靛蓝瓷、森林墨、牛皮纸、沙丘、**Midnight Ink** 暗色)+ Swiss 4 套锚点色(IKB Klein Blue、柠檬黄、柠檬绿、安全橙)
-- 🖼 **图源工作流**:用户图优先;无图时按 Unsplash → Pexels → Flickr CC → Wallhaven → 直接搜索的优先级取图,落本地 + 自动写 `SOURCES.md`
-- 🌫 **WebGL 墨流背景**:杂志风 hero 页可挂动态墨流;低性能或截图时可禁用
-- 🪧 **图片底图遮罩 + 人脸避让**:满铺图必须叠遮罩,文字落点要避开主体,`references/image-overlay.md` 给硬规则
-- 🧰 **截图美化资产**:9 张 WebP 真实材质背景(Editorial 5 / Swiss 4),配套 `.frame-shot` / `.device-browser` / `.device-phone` 工具类
-- 🗺 **地图组件**:MapLibre + OSM 真实瓦片,支持多 pin + 连线,适合旅行攻略
-- ✅ **校验脚本**:`validate-social-deck.mjs` 自动检测溢出、字号上限、4 横带密度、footer 碰撞
-- 📄 **单文件 HTML + Playwright 渲染**:不需要前端构建链,`node render.mjs` 直接出 PNG
+- 🎯 **3 候选组合**:每次产出 3 版「标题 + 主文字 + 副文字」,角度互不重复,直接发群盲选
+- ✂️ **封面 ≠ 标题**:同一件事拆成两句——标题正式客观,封面情绪网感,承担"为什么我要点开"
+- 📏 **硬约束字数**:主文字 ≤10 字、副文字 ≤12 字,一个信息点 + 一个具体回报/搜索关键词
+- 🔎 **SEO = 钩子**:把可搜索关键词折进情绪钩子那句话里,因为小红书会读封面里的字做检索
+- 🧱 **9 套封面范式**:大字报型、泥石流型、数字证据型、对比型、场景代入型……按内容类型路由(`references/cover-text.md`)
+- 🧮 **标题框架**:12 风格 × 6 句式 × 4 维关键词矩阵(主体/动作/数字/情绪),按账号与内容类型交叉
+- 🖱 **可拖拽 HTML 编辑器**:`assets/cover-text-editor.html`,浏览器直接开,载入你的照片,拖文字层,滑块调 位置/旋转/字号/字重/颜色/透明度/字距
+- 🛟 **安全区遮罩**:上下各 150px 虚线提示头像/点赞按钮遮挡区,关键文字守在中上 1/3
+- 🔁 **组合切换 + 一键复制**:切 A/B/C 只换文案保留版式,「复制全部」把 3 组一次性贴进微信群
+- 🚫 **平视感 + 违禁词**:避开"我来教你"教导口吻,emoji 过气能不用就不用,自动筛 最/第一/唯一 等违禁词
+- 🛵 **Cosmosworks 品牌口吻**:四套主题 cosmos-dark / sport / clean / green,真实感 ＞ 精美感
 
 ## 适合 / 不适合
 

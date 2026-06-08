@@ -1,15 +1,16 @@
 {
   "name": "cosmos-social-card-skill",
   "version": "1.0.0",
-  "description": "",
-  "main": "index.js",
+  "description": "Generate Rednote cover text + titles and a draggable HTML cover-text editor. The editor (assets/cover-text-editor.html) is zero-dependency and opens directly in a browser.",
+  "main": "assets/cover-text-editor.html",
   "scripts": {
-    "validate": "node validate-social-deck.mjs"
+    "validate:legacy": "node assets/legacy/validate-social-deck.mjs"
   },
-  "keywords": [],
+  "keywords": ["xiaohongshu", "rednote", "cover-text", "title", "copywriting"],
   "author": "",
-  "license": "ISC",
-  "dependencies": {
+  "license": "AGPL-3.0",
+  "dependencies": {},
+  "optionalDependencies": {
     "playwright": "^1.60.0"
   }
 }
