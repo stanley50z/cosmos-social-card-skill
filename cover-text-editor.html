@@ -1,0 +1,407 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>封面文字编辑器 · Cover Text Editor</title>
+<!--
+  COSMOS Rednote 封面文字编辑器
+  ------------------------------------------------------------------
+  这是一个自包含的网页：直接用浏览器打开，无需任何构建步骤。
+
+  Claude 每次只改下面的 ZUHE 数组（3 个候选组合的文案），其余全是静态骨架。
+  Claude 看过用户照片后，预设 ZUHE（文案）、layout（文字版式）、bg（底图缩放/平移）、scrim（蒙版）。
+  人类作者在浏览器里：
+    1. 载入自己的封面底图（或用主题纯色背景）
+    2. 「底图调整」缩放/平移底图，把主体挪进安全区、避免被裁掉
+    3. 拖动 主文字 / 副文字 两个文字层，右侧滑块微调 位置/旋转/字号/字重/颜色/透明度/字距
+    4. 底图太亮文字看不清，就开「可读性蒙版 Scrim」压暗
+    5. 切 组合 A/B/C 盲选文案——版式/底图/蒙版保留，只换文字
+    6. 点「复制全部」把 3 组 标题+主+副 一次性贴进微信群盲选
+  ------------------------------------------------------------------
+-->
+<style>
+  :root{
+    --canvas-w: 900px;
+    --canvas-h: 1200px;
+    --bg: #0b0b0d;
+    --panel: #16161a;
+    --line: #2a2a31;
+    --txt: #e9e9ee;
+    --muted: #8a8a96;
+    --accent: #c7ff3e;
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0; background:var(--bg); color:var(--txt);
+    font-family:-apple-system,"PingFang SC","Microsoft YaHei",system-ui,sans-serif;
+    display:flex; min-height:100vh;
+  }
+  .stage-wrap{
+    flex:1; display:flex; flex-direction:column; align-items:center;
+    padding:32px; gap:16px; overflow:auto;
+  }
+  .toolbar{
+    display:flex; gap:8px; align-items:center; flex-wrap:wrap;
+    width:100%; max-width:480px;
+  }
+  .toolbar .zuhe-switch{display:flex; gap:6px; margin-right:auto;}
+  button{
+    background:var(--panel); color:var(--txt); border:1px solid var(--line);
+    border-radius:8px; padding:8px 14px; font-size:13px; cursor:pointer;
+    transition:.12s;
+  }
+  button:hover{border-color:var(--accent);}
+  button.active{background:var(--accent); color:#111; border-color:var(--accent); font-weight:600;}
+  .canvas{
+    position:relative; width:var(--canvas-w); height:var(--canvas-h);
+    background:#1d1d22 center/cover no-repeat; border-radius:4px;
+    overflow:hidden; flex:none;
+    transform-origin:top center;
+    box-shadow:0 12px 48px rgba(0,0,0,.5);
+  }
+  .canvas .bg-img{position:absolute; inset:0; width:100%; height:100%; object-fit:cover; transform-origin:center;}
+  .scrim{position:absolute; inset:0; pointer-events:none; z-index:1;}
+  .layer{
+    position:absolute; cursor:grab; user-select:none; white-space:pre;
+    line-height:1.15; padding:4px; transform-origin:center;
+    text-shadow:0 2px 18px rgba(0,0,0,.35);
+  }
+  .layer.sel{outline:1.5px dashed var(--accent); outline-offset:4px;}
+  .layer:active{cursor:grabbing;}
+  .panel{
+    width:320px; flex:none; background:var(--panel); border-left:1px solid var(--line);
+    padding:20px; overflow:auto; display:flex; flex-direction:column; gap:18px;
+  }
+  .panel h2{font-size:13px; letter-spacing:.08em; text-transform:uppercase; color:var(--muted); margin:0;}
+  .layer-tabs{display:flex; gap:8px;}
+  .field{display:flex; flex-direction:column; gap:6px;}
+  .field label{font-size:12px; color:var(--muted); display:flex; justify-content:space-between;}
+  .field input[type=range]{width:100%; accent-color:var(--accent);}
+  .field input[type=text], .field input[type=color], .field select{
+    background:var(--bg); border:1px solid var(--line); color:var(--txt);
+    border-radius:6px; padding:8px; font-size:13px;
+  }
+  .field input[type=color]{height:36px; padding:2px;}
+  .row2{display:grid; grid-template-columns:1fr 1fr; gap:12px;}
+  .hint{font-size:11px; color:var(--muted); line-height:1.5;}
+  .copy-out{
+    background:var(--bg); border:1px solid var(--line); border-radius:6px;
+    padding:10px; font:12px/1.6 monospace; color:var(--muted);
+    white-space:pre-wrap; max-height:160px; overflow:auto;
+  }
+  .divider{height:1px; background:var(--line); border:0; margin:2px 0;}
+</style>
+</head>
+<body>
+  <div class="stage-wrap">
+    <div class="toolbar">
+      <div class="zuhe-switch" id="zuheSwitch"></div>
+      <label class="file-btn">
+        <button type="button" onclick="document.getElementById('bgInput').click()">载入底图</button>
+        <input id="bgInput" type="file" accept="image/*" hidden>
+      </label>
+    </div>
+
+    <div class="canvas" id="canvas">
+      <img class="bg-img" id="bgImg" alt="" style="display:none">
+      <div class="scrim" id="scrim"></div>
+      <div class="layer" id="layerZhu" data-key="zhu"></div>
+      <div class="layer" id="layerFu" data-key="fu"></div>
+    </div>
+  </div>
+
+  <div class="panel">
+    <div>
+      <h2>当前组合</h2>
+      <div class="hint" id="zuheMeta" style="margin-top:8px"></div>
+    </div>
+    <hr class="divider">
+    <div>
+      <h2>编辑文字层</h2>
+      <div class="layer-tabs" style="margin-top:10px">
+        <button class="active" data-layer="zhu">主文字</button>
+        <button data-layer="fu">副文字</button>
+      </div>
+    </div>
+
+    <div class="field">
+      <label>文字内容（仅当前层显示，切组合会被覆盖）</label>
+      <input type="text" id="ctlText">
+    </div>
+
+    <div class="row2">
+      <div class="field"><label>X 位置 <span id="vX"></span></label><input type="range" id="ctlX" min="0" max="900" value="120"></div>
+      <div class="field"><label>Y 位置 <span id="vY"></span></label><input type="range" id="ctlY" min="0" max="1200" value="300"></div>
+    </div>
+    <div class="row2">
+      <div class="field"><label>旋转 <span id="vR"></span></label><input type="range" id="ctlR" min="-30" max="30" value="0"></div>
+      <div class="field"><label>字距 <span id="vL"></span></label><input type="range" id="ctlL" min="-8" max="30" value="0"></div>
+    </div>
+    <div class="row2">
+      <div class="field"><label>字号 <span id="vS"></span></label><input type="range" id="ctlS" min="24" max="180" value="96"></div>
+      <div class="field"><label>字重 <span id="vW"></span></label><input type="range" id="ctlW" min="100" max="900" step="100" value="800"></div>
+    </div>
+    <div class="row2">
+      <div class="field"><label>颜色</label><input type="color" id="ctlC" value="#ffffff"></div>
+      <div class="field"><label>透明度 <span id="vO"></span></label><input type="range" id="ctlO" min="0" max="100" value="100"></div>
+    </div>
+    <div class="field">
+      <label>对齐</label>
+      <select id="ctlAlign"><option value="left">左对齐</option><option value="center">居中</option><option value="right">右对齐</option></select>
+    </div>
+
+    <hr class="divider">
+    <div>
+      <h2>底图调整</h2>
+      <div class="row2" style="margin-top:10px">
+        <div class="field"><label>缩放 <span id="vBgS"></span></label><input type="range" id="ctlBgS" min="100" max="260" value="100"></div>
+        <div class="field"><label>水平 <span id="vBgX"></span></label><input type="range" id="ctlBgX" min="-400" max="400" value="0"></div>
+      </div>
+      <div class="field"><label>垂直 <span id="vBgY"></span></label><input type="range" id="ctlBgY" min="-500" max="500" value="0"></div>
+      <p class="hint">载入底图后缩放/平移，调整构图。</p>
+    </div>
+
+    <hr class="divider">
+    <div>
+      <h2>可读性蒙版 / Scrim</h2>
+      <div class="layer-tabs" style="margin-top:10px">
+        <button id="scrimToggle" class="active">蒙版开</button>
+      </div>
+      <div class="field" style="margin-top:10px">
+        <label>方向</label>
+        <select id="ctlScrimMode">
+          <option value="top">顶部渐暗</option>
+          <option value="bottom">底部渐暗</option>
+          <option value="both">上下渐暗</option>
+          <option value="full">整体压暗</option>
+        </select>
+      </div>
+      <div class="row2">
+        <div class="field"><label>颜色</label><input type="color" id="ctlScrimC" value="#000000"></div>
+        <div class="field"><label>浓度 <span id="vScrimO"></span></label><input type="range" id="ctlScrimO" min="0" max="90" value="35"></div>
+      </div>
+      <p class="hint">底图太亮、文字看不清时打开；让文字背后压暗一点。</p>
+    </div>
+
+    <hr class="divider">
+    <div class="field">
+      <h2>盲选导出</h2>
+      <button id="copyBtn" style="margin-top:6px">复制全部 3 组 → 贴进微信群</button>
+      <div class="copy-out" id="copyPreview"></div>
+      <p class="hint">标题用于正文（不上封面）；主/副文字是落在封面图上的字。版式三组共用，切组合只换文案。</p>
+    </div>
+  </div>
+
+<script>
+/* ===================================================================
+   ZUHE —— Claude 每次调用只改这一段。
+   标题 ≠ 封面：同一件事，透露不同信息点。
+=================================================================== */
+const ZUHE = [
+  { id:'A', biaoti:'Vapor 新配色正式发布，停下来就被人认出来了', zhu:'这个红不用介绍', fu:'Vapor 酒红 新配色发布' },
+  { id:'B', biaoti:'Vapor 新配色来了：混凝土背景都压不住这个深红', zhu:'出太阳才看得懂', fu:'Vapor 深红 全新配色' },
+  { id:'C', biaoti:'Vapor 新款深红配色发布，骑出去感觉会引来很多眼神', zhu:'有点不好意思骑', fu:'Vapor 深红 出街实拍' },
+];
+
+/* 版式：照片上方 ~40% 是空白混凝土墙，文字落在左上区域。
+   cosmos-dark 主题：白字 + 顶部蒙版 28% 对抗灰色混凝土纹理。 */
+const layout = {
+  zhu:{ x:70, y:210, r:0, size:90, weight:700, color:'#ffffff', opacity:100, letter:2, align:'left' },
+  fu :{ x:72, y:322, r:0, size:30, weight:400, color:'#c7ff3e', opacity:95, letter:3, align:'left' },
+};
+
+/* 照片已是竖版，车身居下、混凝土墙居上，默认裁切无需位移。
+   顶部蒙版 28%：压暗灰墙纹理，白字清晰可读。 */
+const bg = { scale:100, x:0, y:0 };
+const scrim = { on:true, color:'#000000', opacity:28, mode:'top' };
+
+let curZuhe = 0;
+let curLayer = 'zhu';
+
+const el = id => document.getElementById(id);
+const layerEls = { zhu: el('layerZhu'), fu: el('layerFu') };
+
+function renderLayer(key){
+  const L = layout[key], z = ZUHE[curZuhe];
+  const node = layerEls[key];
+  node.textContent = z[key];
+  node.style.left = L.x + 'px';
+  node.style.top = L.y + 'px';
+  node.style.fontSize = L.size + 'px';
+  node.style.fontWeight = L.weight;
+  node.style.color = L.color;
+  node.style.opacity = L.opacity/100;
+  node.style.letterSpacing = L.letter + 'px';
+  node.style.textAlign = L.align;
+  node.style.transform = `rotate(${L.r}deg)`;
+  node.classList.toggle('sel', key === curLayer);
+}
+function renderBg(){
+  el('bgImg').style.transform = `translate(${bg.x}px, ${bg.y}px) scale(${bg.scale/100})`;
+}
+function hexToRgba(hex, a){
+  const n = parseInt(hex.slice(1),16);
+  return `rgba(${(n>>16)&255}, ${(n>>8)&255}, ${n&255}, ${a})`;
+}
+function renderScrim(){
+  const s = el('scrim');
+  if(!scrim.on){ s.style.background='none'; return; }
+  const c = hexToRgba(scrim.color, scrim.opacity/100);
+  const t = hexToRgba(scrim.color, 0);
+  let v;
+  if(scrim.mode==='full')      v = c;
+  else if(scrim.mode==='top')  v = `linear-gradient(to bottom, ${c}, ${t} 55%)`;
+  else if(scrim.mode==='both') v = `linear-gradient(to bottom, ${c}, ${t} 35%, ${t} 65%, ${c})`;
+  else                         v = `linear-gradient(to top, ${c}, ${t} 55%)`;
+  s.style.background = v;
+}
+function renderAll(){ renderBg(); renderScrim(); renderLayer('zhu'); renderLayer('fu'); }
+
+function syncControls(){
+  const L = layout[curLayer], z = ZUHE[curZuhe];
+  el('ctlText').value = z[curLayer];
+  el('ctlX').value=L.x; el('ctlY').value=L.y; el('ctlR').value=L.r;
+  el('ctlL').value=L.letter; el('ctlS').value=L.size; el('ctlW').value=L.weight;
+  el('ctlC').value=L.color; el('ctlO').value=L.opacity; el('ctlAlign').value=L.align;
+  el('vX').textContent=L.x; el('vY').textContent=L.y; el('vR').textContent=L.r+'°';
+  el('vL').textContent=L.letter; el('vS').textContent=L.size; el('vW').textContent=L.weight;
+  el('vO').textContent=L.opacity+'%';
+}
+
+function bindRange(id, prop, vId, suffix=''){
+  el(id).addEventListener('input', e=>{
+    let v = e.target.value;
+    if(prop!=='color') v = +v;
+    layout[curLayer][prop] = v;
+    if(vId) el(vId).textContent = v + suffix;
+    renderLayer(curLayer);
+  });
+}
+bindRange('ctlX','x','vX'); bindRange('ctlY','y','vY');
+bindRange('ctlR','r','vR','°'); bindRange('ctlL','letter','vL');
+bindRange('ctlS','size','vS'); bindRange('ctlW','weight','vW');
+bindRange('ctlO','opacity','vO','%');
+el('ctlC').addEventListener('input', e=>{ layout[curLayer].color=e.target.value; renderLayer(curLayer); });
+el('ctlAlign').addEventListener('change', e=>{ layout[curLayer].align=e.target.value; renderLayer(curLayer); });
+el('ctlText').addEventListener('input', e=>{ ZUHE[curZuhe][curLayer]=e.target.value; renderLayer(curLayer); buildCopy(); });
+
+function bindBg(id, prop, vId, suffix=''){
+  el(id).addEventListener('input', e=>{
+    bg[prop] = +e.target.value;
+    if(vId) el(vId).textContent = e.target.value + suffix;
+    renderBg();
+  });
+}
+bindBg('ctlBgS','scale','vBgS','%'); bindBg('ctlBgX','x','vBgX'); bindBg('ctlBgY','y','vBgY');
+
+el('ctlScrimMode').addEventListener('change', e=>{ scrim.mode=e.target.value; renderScrim(); });
+el('ctlScrimC').addEventListener('input', e=>{ scrim.color=e.target.value; renderScrim(); });
+el('ctlScrimO').addEventListener('input', e=>{ scrim.opacity=+e.target.value; el('vScrimO').textContent=e.target.value+'%'; renderScrim(); });
+el('scrimToggle').addEventListener('click', e=>{
+  scrim.on=!scrim.on;
+  e.target.classList.toggle('active', scrim.on);
+  e.target.textContent = scrim.on ? '蒙版开' : '蒙版关';
+  renderScrim();
+});
+
+function syncBgScrimControls(){
+  el('ctlBgS').value=bg.scale; el('vBgS').textContent=bg.scale+'%';
+  el('ctlBgX').value=bg.x; el('vBgX').textContent=bg.x;
+  el('ctlBgY').value=bg.y; el('vBgY').textContent=bg.y;
+  el('ctlScrimMode').value=scrim.mode; el('ctlScrimC').value=scrim.color;
+  el('ctlScrimO').value=scrim.opacity; el('vScrimO').textContent=scrim.opacity+'%';
+  el('scrimToggle').classList.toggle('active', scrim.on);
+  el('scrimToggle').textContent = scrim.on ? '蒙版开' : '蒙版关';
+}
+
+document.querySelectorAll('.layer-tabs button').forEach(b=>{
+  b.addEventListener('click', ()=>{
+    document.querySelectorAll('.layer-tabs button').forEach(x=>x.classList.remove('active'));
+    b.classList.add('active');
+    curLayer = b.dataset.layer;
+    syncControls(); renderAll();
+  });
+});
+
+function buildZuheSwitch(){
+  const wrap = el('zuheSwitch'); wrap.innerHTML='';
+  ZUHE.forEach((z,i)=>{
+    const b=document.createElement('button');
+    b.textContent='组合 '+z.id; b.className = i===0?'active':'';
+    b.onclick=()=>{
+      curZuhe=i;
+      [...wrap.children].forEach(c=>c.classList.remove('active'));
+      b.classList.add('active');
+      el('zuheMeta').textContent = '标题：'+z.biaoti;
+      syncControls(); renderAll();
+    };
+    wrap.appendChild(b);
+  });
+  el('zuheMeta').textContent = '标题：'+ZUHE[0].biaoti;
+}
+
+Object.values(layerEls).forEach(node=>{
+  node.addEventListener('pointerdown', e=>{
+    curLayer = node.dataset.key;
+    document.querySelectorAll('.layer-tabs button').forEach(x=>x.classList.toggle('active', x.dataset.layer===curLayer));
+    syncControls();
+    const startX=e.clientX, startY=e.clientY;
+    const ox=layout[curLayer].x, oy=layout[curLayer].y;
+    const scale = el('canvas').getBoundingClientRect().width / 900;
+    const move=ev=>{
+      layout[curLayer].x = Math.round(ox + (ev.clientX-startX)/scale);
+      layout[curLayer].y = Math.round(oy + (ev.clientY-startY)/scale);
+      syncControls(); renderLayer(curLayer);
+    };
+    const up=()=>{document.removeEventListener('pointermove',move);document.removeEventListener('pointerup',up);};
+    document.addEventListener('pointermove',move);
+    document.addEventListener('pointerup',up);
+  });
+});
+
+el('bgInput').addEventListener('change', e=>{
+  const f=e.target.files[0]; if(!f) return;
+  const url=URL.createObjectURL(f);
+  el('bgImg').src=url; el('bgImg').style.display='block';
+  renderBg();
+});
+
+function buildCopy(){
+  const txt = ZUHE.map(z=>`【组合 ${z.id}】\n标题：${z.biaoti}\n封面·主：${z.zhu}\n封面·副：${z.fu}`).join('\n\n');
+  el('copyPreview').textContent = txt;
+  return txt;
+}
+el('copyBtn').addEventListener('click', ()=>{
+  const txt=buildCopy();
+  navigator.clipboard.writeText(txt).then(()=>{
+    el('copyBtn').textContent='已复制 ✓';
+    setTimeout(()=>el('copyBtn').textContent='复制全部 3 组 → 贴进微信群',1500);
+  });
+});
+
+function fitCanvas(){
+  const avail = window.innerHeight - 140;
+  const scale = Math.min(1, avail/1200);
+  el('canvas').style.transform = scale<1 ? `scale(${scale})` : 'none';
+  el('canvas').style.marginBottom = scale<1 ? (1200*scale-1200)+'px' : '0';
+}
+window.addEventListener('resize', fitCanvas);
+
+buildZuheSwitch();
+syncControls();
+syncBgScrimControls();
+
+/* 预载底图 */
+(function(){
+  const img = el('bgImg');
+  img.src = 'file:///C:/Users/13982/Downloads/%E5%BE%AE%E4%BF%A1%E5%9B%BE%E7%89%87_20260610115057.png';
+  img.style.display = 'block';
+})();
+
+renderAll();
+buildCopy();
+fitCanvas();
+</script>
+</body>
+</html>

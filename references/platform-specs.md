@@ -10,12 +10,10 @@ Default size:
 - Ratio: `3:4`
 - Export: PNG for text-heavy images, JPEG only when photo-only and file size matters.
 
-Safe area:
+Composition margin (构图留边，非 UI 遮挡):
 
-- Side margin: 72-96px.
-- Top margin: 72-112px.
-- Bottom margin: 80-120px.
-- Keep all text and key objects inside the safe area.
+- 小红书双列信息流里封面图没有 UI 叠加，无安全区遮挡。
+- 留边纯粹是构图习惯：避免主体贴边导致视觉紧张。粗略参考：四边各留 40-60px 即可。
 
 Recommended set:
 

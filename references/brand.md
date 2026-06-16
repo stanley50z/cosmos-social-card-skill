@@ -11,18 +11,21 @@ The skill defaults to the **Cosmosworks** voice and look — an editorial e-bike
 - **Specific over superlative.** Concrete numbers (`3千公里`, `坡道 18%`) instead of 最/第一/唯一.
 - **Dry, a little self-aware.** Self-deprecating flow ("骑了一年，我把油车卖了") reads truer than hype.
 
-## Themes (editor `--accent` / background)
+## Color decisions (AI decides freely, themes are reference only)
 
-Four brand themes. The editor defaults to **cosmos-green**. Set the relevant color on the canvas/text via the editor sliders, or change `--accent` / `--bg` in `cover-text-editor.html`.
+Don't route to a preset theme. Read the photo and make two deliberate color choices:
 
-| theme | 何时用 | 主色 | 背景倾向 |
+- **主文字 color**: high contrast against the text region. White on dark/busy areas; near-black (`#1a1a1a`) on bright/clean areas.
+- **副文字 color**: intentionally different from 主文字 to create hierarchy. Options: pull a hue from the photo's palette, use a warm/cool accent that complements the image, or use brand green `#c7ff3e` if it genuinely earns its place. Never default to the same color as 主文字.
+
+The four cosmos themes below are **creative reference**, not a routing table. Use them for inspiration when stuck — don't feel obligated to pick one.
+
+| theme | 感觉 | 主色倾向 | 副色 / 强调倾向 |
 | --- | --- | --- | --- |
-| **cosmos-dark** | 夜骑 / 电影感 / 重型号 key art | 冷白文字 + 单点强调 | 深底图 / 黑 |
-| **cosmos-sport** | 运动 / 爬坡 / 性能数据 | 高饱和橙或红 | 动态实拍 |
-| **cosmos-clean** | 通勤 / 生活方式 / 极简 | 近黑文字 + 低饱和 | 亮底图 / 浅 |
-| **cosmos-green** *(default)* | 户外 / 续航 / 环保叙事 | 荧光绿 `#c7ff3e` | 自然/街景实拍 |
-
-Pick the theme by **content feeling**, not by category lookup — same logic as the title styles. A commuting piece is usually cosmos-clean; a 18% 爬坡实测 is cosmos-sport; a night-ride journal is cosmos-dark.
+| **cosmos-dark** | 电影感 / 夜骑 / 沉稳 | 冷白 | 单点强调色（荧光绿、暖金等） |
+| **cosmos-sport** | 爆发力 / 性能数据 | 高饱和橙红 | 白或浅色 |
+| **cosmos-clean** | 极简 / 通勤 / 生活感 | 近黑 `#1a1a1a` | 低饱和灰或品牌绿 |
+| **cosmos-green** | 户外 / 续航 / 自然 | 白 or 近黑 | 荧光绿 `#c7ff3e` |
 
 ## Visual anchor (固定识别符号) — doc Section I / ch42 (2025-10)
 

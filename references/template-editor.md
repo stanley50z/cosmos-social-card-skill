@@ -56,7 +56,7 @@ Do **not** render a PNG — the cover image is the user's own photo. The skill s
 - **Two draggable text layers** — 主文字 / 副文字, mirrored by sidebar sliders.
 - **Per-layer controls** — X, Y, rotation (−30°…30°), font-size (24–180px), font-weight (100–900), color, opacity, letter-spacing, text-align. Layout is shared across all 3 组合.
 - **组合 A/B/C switcher** — hot-swaps the text content while keeping the layout / bg / scrim, for blind selection.
-- **Safe-zone overlay** — dashed lines at 150px top (avatar/handle) and 150px bottom (like/comment buttons); toggle on/off. Keep critical text between them.
+- **Safe-zone overlay** — removed. 小红书 双列信息流里封面图没有 UI 遮挡，不需要安全线。
 - **Load background** — user drops their own cover photo; text composes on top live.
 - **底图调整** — 缩放(100–260%) + 水平/垂直平移，把主体挪进安全区、修正 object-fit:cover 的死裁。
 - **可读性蒙版 / Scrim** — 文字与底图之间的渐变压暗层；开关 + 方向(底/顶/上下/整体) + 颜色 + 浓度，底图太亮时救回文字。
@@ -66,7 +66,7 @@ Do **not** render a PNG — the cover image is the user's own photo. The skill s
 ## Canvas spec
 
 - 900 × 1200 px (3:4 vertical — 占双列流最大面积).
-- `--safe-margin: 150px` top/bottom (edit in CSS if a platform changes its UI overlay).
+- No safe-margin. 小红书封面在信息流中没有 UI 遮挡。
 - Background is the user's photo (`object-fit: cover`) or the theme color when none loaded.
 
 ## Why this and not a rendered cover

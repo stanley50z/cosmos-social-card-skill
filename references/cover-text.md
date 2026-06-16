@@ -48,15 +48,6 @@ Rednote indexes the text **embedded inside the cover image** for search relevanc
 - Make the emotional hook and the SEO keyword the **same word** where possible. Don't bolt a keyword on as dead weight — fold it into the line that already carries the feeling.
 - For Cosmosworks that keyword is usually the product/use-case noun: `通勤`, `爬坡`, `长测`, `电助力`, a model name.
 
-## Safe zones (where text is allowed to live)
-
-The feed UI eats both ends of a cover:
-
-- **Top** — avatar + account handle overlay.
-- **Bottom** — like / comment / save buttons.
-
-So critical text stays in the **center-upper third**, with **≥ 150px safety margin** top and bottom on a 900×1200 canvas. The editor template draws these as a dashed overlay — keep 主文字 and 副文字 between the two dashed lines. Anything in the margins is gambling that the UI won't cover it.
-
 ## Tone: 平视感 (peer, not teacher)
 
 > 叙事立场从"我来教你"变成"我也在练"——平视感是最大的情感连接。
@@ -124,7 +115,6 @@ Paradigms marked 需要照片 = 是 require a real photo from the user — the s
 - [ ] 主文字 ≤ 10 字, 副文字 ≤ 12 字.
 - [ ] Size contrast between 主 and 副 is obvious.
 - [ ] One searchable keyword lives inside the cover text.
-- [ ] Text sits between the 150px safe-zone lines.
 - [ ] Peer tone — no "我来教你".
 - [ ] 0 (max 1) emoji.
 - [ ] No 违禁词 (最/第一/唯一/…).
